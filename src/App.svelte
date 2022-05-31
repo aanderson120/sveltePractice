@@ -1,21 +1,34 @@
 <script>
-  let firstName = "Amanda";
-  let lastName = "Anderson";
-  let beltColor = "black";
-
-  $: fullName = `${firstName} ${lastName}`;
-  //   runs block of code whenever value changes
-  $: {
-    console.log(beltColor);
-    console.log(fullName);
-  }
+  let people = [
+    { name: "yoshi", beltColor: "black", age: 25, id: 1 },
+    { name: "mario", beltColor: "orange", age: 45, id: 2 },
+    { name: "luigi", beltColor: "brown", age: 35, id: 3 },
+  ];
 </script>
 
 <main>
-  <p>{fullName} - {beltColor} belt</p>
-  <input type="text" bind:value={firstName} />
-  <input type="text" bind:value={lastName} />
-  <input type="text" bind:value={beltColor} />
+  <!-- each loop -->
+  {#each people as person (person.id)}
+    <div>
+      <h4>{person.name}</h4>
+      <p>{person.age} years old, {person.beltColor} belt.</p>
+    </div>
+  {:else}
+    <p>There are no people to show at the moment.</p>
+  {/each}
+  <!-- same as 
+	  <div>
+    <h4>{people[0].name}</h4>
+    <p>{people[0].beltColor}</p>
+  </div>
+  <div>
+    <h4>{people[1].name}</h4>
+    <p>{people[1].beltColor}</p>
+  </div>
+  <div>
+    <h4>{people[2].name}</h4>
+    <p>{people[2].beltColor}</p>
+  </div> -->
 </main>
 
 <style>
@@ -24,13 +37,6 @@
     padding: 1em;
     max-width: 240px;
     margin: 0 auto;
-  }
-
-  h1 {
-    color: #ff3e00;
-    text-transform: uppercase;
-    font-size: 4em;
-    font-weight: 100;
   }
 
   @media (min-width: 640px) {
