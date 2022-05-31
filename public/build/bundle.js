@@ -45,6 +45,10 @@ var app = (function () {
     function space() {
         return text(' ');
     }
+    function listen(node, event, handler, options) {
+        node.addEventListener(event, handler, options);
+        return () => node.removeEventListener(event, handler, options);
+    }
     function attr(node, attribute, value) {
         if (value == null)
             node.removeAttribute(attribute);
@@ -384,12 +388,32 @@ var app = (function () {
         dispatch_dev('SvelteDOMRemove', { node });
         detach(node);
     }
+    function listen_dev(node, event, handler, options, has_prevent_default, has_stop_propagation) {
+        const modifiers = options === true ? ['capture'] : options ? Array.from(Object.keys(options)) : [];
+        if (has_prevent_default)
+            modifiers.push('preventDefault');
+        if (has_stop_propagation)
+            modifiers.push('stopPropagation');
+        dispatch_dev('SvelteDOMAddEventListener', { node, event, handler, modifiers });
+        const dispose = listen(node, event, handler, options);
+        return () => {
+            dispatch_dev('SvelteDOMRemoveEventListener', { node, event, handler, modifiers });
+            dispose();
+        };
+    }
     function attr_dev(node, attribute, value) {
         attr(node, attribute, value);
         if (value == null)
             dispatch_dev('SvelteDOMRemoveAttribute', { node, attribute });
         else
             dispatch_dev('SvelteDOMSetAttribute', { node, attribute, value });
+    }
+    function set_data_dev(text, data) {
+        data = '' + data;
+        if (text.wholeText === data)
+            return;
+        dispatch_dev('SvelteDOMSetData', { node: text, data });
+        text.data = data;
     }
     function validate_each_argument(arg) {
         if (typeof arg !== 'string' && !(arg && typeof arg === 'object' && 'length' in arg)) {
@@ -433,11 +457,11 @@ var app = (function () {
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[1] = list[i];
+    	child_ctx[3] = list[i];
     	return child_ctx;
     }
 
-    // (16:2) {:else}
+    // (20:2) {:else}
     function create_else_block(ctx) {
     	let p;
 
@@ -445,7 +469,7 @@ var app = (function () {
     		c: function create() {
     			p = element("p");
     			p.textContent = "There are no people to show at the moment.";
-    			add_location(p, file, 16, 4, 413);
+    			add_location(p, file, 20, 4, 592);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -460,28 +484,36 @@ var app = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(16:2) {:else}",
+    		source: "(20:2) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (11:2) {#each people as person (person.id)}
+    // (14:2) {#each people as person (person.id)}
     function create_each_block(key_1, ctx) {
     	let div;
     	let h4;
-    	let t0_value = /*person*/ ctx[1].name + "";
+    	let t0_value = /*person*/ ctx[3].name + "";
     	let t0;
     	let t1;
     	let p;
-    	let t2_value = /*person*/ ctx[1].age + "";
+    	let t2_value = /*person*/ ctx[3].age + "";
     	let t2;
     	let t3;
-    	let t4_value = /*person*/ ctx[1].beltColor + "";
+    	let t4_value = /*person*/ ctx[3].beltColor + "";
     	let t4;
     	let t5;
     	let t6;
+    	let button;
+    	let t8;
+    	let mounted;
+    	let dispose;
+
+    	function click_handler() {
+    		return /*click_handler*/ ctx[2](/*person*/ ctx[3]);
+    	}
 
     	const block = {
     		key: key_1,
@@ -497,9 +529,13 @@ var app = (function () {
     			t4 = text(t4_value);
     			t5 = text(" belt.");
     			t6 = space();
-    			add_location(h4, file, 12, 6, 303);
-    			add_location(p, file, 13, 6, 332);
-    			add_location(div, file, 11, 4, 291);
+    			button = element("button");
+    			button.textContent = "Delete";
+    			t8 = space();
+    			add_location(h4, file, 15, 6, 412);
+    			add_location(p, file, 16, 6, 441);
+    			add_location(button, file, 17, 6, 503);
+    			add_location(div, file, 14, 4, 400);
     			this.first = div;
     		},
     		m: function mount(target, anchor) {
@@ -513,12 +549,24 @@ var app = (function () {
     			append_dev(p, t4);
     			append_dev(p, t5);
     			append_dev(div, t6);
+    			append_dev(div, button);
+    			append_dev(div, t8);
+
+    			if (!mounted) {
+    				dispose = listen_dev(button, "click", click_handler, false, false, false);
+    				mounted = true;
+    			}
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
+    			if (dirty & /*people*/ 1 && t0_value !== (t0_value = /*person*/ ctx[3].name + "")) set_data_dev(t0, t0_value);
+    			if (dirty & /*people*/ 1 && t2_value !== (t2_value = /*person*/ ctx[3].age + "")) set_data_dev(t2, t2_value);
+    			if (dirty & /*people*/ 1 && t4_value !== (t4_value = /*person*/ ctx[3].beltColor + "")) set_data_dev(t4, t4_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
+    			mounted = false;
+    			dispose();
     		}
     	};
 
@@ -526,7 +574,7 @@ var app = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(11:2) {#each people as person (person.id)}",
+    		source: "(14:2) {#each people as person (person.id)}",
     		ctx
     	});
 
@@ -539,7 +587,7 @@ var app = (function () {
     	let each_1_lookup = new Map();
     	let each_value = /*people*/ ctx[0];
     	validate_each_argument(each_value);
-    	const get_key = ctx => /*person*/ ctx[1].id;
+    	const get_key = ctx => /*person*/ ctx[3].id;
     	validate_each_keys(ctx, each_value, get_each_context, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -566,8 +614,8 @@ var app = (function () {
     				each_1_else.c();
     			}
 
-    			attr_dev(main, "class", "svelte-177t831");
-    			add_location(main, file, 8, 0, 220);
+    			attr_dev(main, "class", "svelte-rivwan");
+    			add_location(main, file, 12, 0, 350);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -584,7 +632,7 @@ var app = (function () {
     			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*people*/ 1) {
+    			if (dirty & /*handleClick, people*/ 3) {
     				each_value = /*people*/ ctx[0];
     				validate_each_argument(each_value);
     				validate_each_keys(ctx, each_value, get_each_context, get_key);
@@ -651,13 +699,19 @@ var app = (function () {
     		}
     	];
 
+    	const handleClick = id => {
+    		//delete the person from people
+    		$$invalidate(0, people = people.filter(person => person.id != id));
+    	};
+
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<App> was created with unknown prop '${key}'`);
     	});
 
-    	$$self.$capture_state = () => ({ people });
+    	const click_handler = person => handleClick(person.id);
+    	$$self.$capture_state = () => ({ people, handleClick });
 
     	$$self.$inject_state = $$props => {
     		if ('people' in $$props) $$invalidate(0, people = $$props.people);
@@ -667,7 +721,7 @@ var app = (function () {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [people];
+    	return [people, handleClick, click_handler];
     }
 
     class App extends SvelteComponentDev {
