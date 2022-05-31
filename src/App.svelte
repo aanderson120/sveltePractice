@@ -1,20 +1,20 @@
 <script>
-  let name = "world";
+  let firstName = "Amanda";
+  let lastName = "Anderson";
   let beltColor = "black";
-  const handleClick = () => {
-    beltColor = "orange";
-  };
-  const handleInput = (e) => {
-    beltColor = e.target.value;
-  };
+
+  $: fullName = `${firstName} ${lastName}`;
+  //   runs block of code whenever value changes
+  $: {
+    console.log(beltColor);
+    console.log(fullName);
+  }
 </script>
 
 <main>
-  <h1>Hello {name}!</h1>
-  <p style="color: {beltColor}">{beltColor} belt</p>
-  <button on:click={handleClick}>update belt color</button>
-  <input type="text" on:input={handleInput} value={beltColor} />
-  <!-- works the same as above -->
+  <p>{fullName} - {beltColor} belt</p>
+  <input type="text" bind:value={firstName} />
+  <input type="text" bind:value={lastName} />
   <input type="text" bind:value={beltColor} />
 </main>
 
