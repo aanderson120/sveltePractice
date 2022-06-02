@@ -61,6 +61,9 @@ var app = (function () {
     function children(element) {
         return Array.from(element.childNodes);
     }
+    function toggle_class(element, name, toggle) {
+        element.classList[toggle ? 'add' : 'remove'](name);
+    }
     function custom_event(type, detail, { bubbles = false, cancelable = false }) {
         const e = document.createEvent('CustomEvent');
         e.initCustomEvent(type, bubbles, cancelable, detail);
@@ -478,7 +481,7 @@ var app = (function () {
 
     const file$1 = "src\\Modal.svelte";
 
-    // (5:0) {#if showModal}
+    // (6:0) {#if showModal}
     function create_if_block$1(ctx) {
     	let div1;
     	let div0;
@@ -490,17 +493,19 @@ var app = (function () {
     			div0 = element("div");
     			p = element("p");
     			p.textContent = "Sign up for offers!";
-    			add_location(p, file$1, 7, 6, 122);
-    			attr_dev(div0, "class", "modal");
-    			add_location(div0, file$1, 6, 4, 95);
-    			attr_dev(div1, "class", "backdrop");
-    			add_location(div1, file$1, 5, 2, 67);
+    			add_location(p, file$1, 8, 6, 159);
+    			attr_dev(div0, "class", "modal svelte-14der3p");
+    			add_location(div0, file$1, 7, 4, 133);
+    			attr_dev(div1, "class", "backdrop svelte-14der3p");
+    			toggle_class(div1, "promo", /*isPromo*/ ctx[1]);
+    			add_location(div1, file$1, 6, 2, 84);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
     			append_dev(div1, div0);
     			append_dev(div0, p);
     		},
+    		p: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div1);
     		}
@@ -510,7 +515,7 @@ var app = (function () {
     		block,
     		id: create_if_block$1.name,
     		type: "if",
-    		source: "(5:0) {#if showModal}",
+    		source: "(6:0) {#if showModal}",
     		ctx
     	});
 
@@ -533,7 +538,9 @@ var app = (function () {
     			if (if_block) if_block.m(target, anchor);
     			insert_dev(target, if_block_anchor, anchor);
     		},
-    		p: noop,
+    		p: function update(ctx, [dirty]) {
+    			if (/*showModal*/ ctx[0]) if_block.p(ctx, dirty);
+    		},
     		i: noop,
     		o: noop,
     		d: function destroy(detaching) {
@@ -557,23 +564,25 @@ var app = (function () {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Modal', slots, []);
     	let showModal = true;
+    	let isPromo = true;
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Modal> was created with unknown prop '${key}'`);
     	});
 
-    	$$self.$capture_state = () => ({ showModal });
+    	$$self.$capture_state = () => ({ showModal, isPromo });
 
     	$$self.$inject_state = $$props => {
     		if ('showModal' in $$props) $$invalidate(0, showModal = $$props.showModal);
+    		if ('isPromo' in $$props) $$invalidate(1, isPromo = $$props.isPromo);
     	};
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [showModal];
+    	return [showModal, isPromo];
     }
 
     class Modal extends SvelteComponentDev {
@@ -810,7 +819,7 @@ var app = (function () {
     				each_1_else.c();
     			}
 
-    			attr_dev(main, "class", "svelte-6pv3cb");
+    			attr_dev(main, "class", "svelte-177t831");
     			add_location(main, file, 17, 0, 401);
     		},
     		l: function claim(nodes) {
