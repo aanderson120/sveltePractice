@@ -17,13 +17,16 @@
   };
 </script>
 
-<Modal
-  message="Hey there!"
-  isPromo={false}
-  {showModal}
-  on:click={toggleModal}
-/>
-<!-- on:click|once - removes the handler after being fired one time -->
+<Modal isPromo={false} {showModal} on:click={toggleModal}>
+  <h3>Add a New Person</h3>
+  <form>
+    <input type="text" placeholder="name" />
+    <input type="text" placeholder="belt color" />
+    <button>Add Person</button>
+  </form>
+</Modal>
+
+
 <main>
   <button on:click|once={toggleModal}>Open Modal</button>
   {#each people as person (person.id)}
