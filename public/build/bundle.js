@@ -52,6 +52,13 @@ var app = (function () {
         node.addEventListener(event, handler, options);
         return () => node.removeEventListener(event, handler, options);
     }
+    function self(fn) {
+        return function (event) {
+            // @ts-ignore
+            if (event.target === this)
+                fn.call(this, event);
+        };
+    }
     function attr(node, attribute, value) {
         if (value == null)
             node.removeAttribute(attribute);
@@ -491,7 +498,7 @@ var app = (function () {
 
     const file$1 = "src\\Modal.svelte";
 
-    // (7:0) {#if showModal}
+    // (8:0) {#if showModal}
     function create_if_block$1(ctx) {
     	let div1;
     	let div0;
@@ -506,12 +513,12 @@ var app = (function () {
     			div0 = element("div");
     			p = element("p");
     			t = text(/*message*/ ctx[0]);
-    			add_location(p, file$1, 9, 6, 224);
+    			add_location(p, file$1, 10, 6, 312);
     			attr_dev(div0, "class", "modal svelte-14der3p");
-    			add_location(div0, file$1, 8, 4, 198);
+    			add_location(div0, file$1, 9, 4, 286);
     			attr_dev(div1, "class", "backdrop svelte-14der3p");
     			toggle_class(div1, "promo", /*isPromo*/ ctx[2]);
-    			add_location(div1, file$1, 7, 2, 140);
+    			add_location(div1, file$1, 8, 2, 223);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -520,7 +527,7 @@ var app = (function () {
     			append_dev(p, t);
 
     			if (!mounted) {
-    				dispose = listen_dev(div1, "click", /*click_handler*/ ctx[3], false, false, false);
+    				dispose = listen_dev(div1, "click", self(/*click_handler*/ ctx[3]), false, false, false);
     				mounted = true;
     			}
     		},
@@ -542,7 +549,7 @@ var app = (function () {
     		block,
     		id: create_if_block$1.name,
     		type: "if",
-    		source: "(7:0) {#if showModal}",
+    		source: "(8:0) {#if showModal}",
     		ctx
     	});
 
@@ -682,7 +689,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (33:2) {:else}
+    // (38:2) {:else}
     function create_else_block(ctx) {
     	let p;
 
@@ -690,7 +697,7 @@ var app = (function () {
     		c: function create() {
     			p = element("p");
     			p.textContent = "There are no people to show at the moment.";
-    			add_location(p, file, 33, 4, 954);
+    			add_location(p, file, 38, 4, 1038);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -705,14 +712,14 @@ var app = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(33:2) {:else}",
+    		source: "(38:2) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (27:6) {#if person.beltColor === "black"}
+    // (32:6) {#if person.beltColor === "black"}
     function create_if_block(ctx) {
     	let p;
     	let strong;
@@ -722,8 +729,8 @@ var app = (function () {
     			p = element("p");
     			strong = element("strong");
     			strong.textContent = "Master Ninja";
-    			add_location(strong, file, 27, 11, 751);
-    			add_location(p, file, 27, 8, 748);
+    			add_location(strong, file, 32, 11, 835);
+    			add_location(p, file, 32, 8, 832);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -738,14 +745,14 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(27:6) {#if person.beltColor === \\\"black\\\"}",
+    		source: "(32:6) {#if person.beltColor === \\\"black\\\"}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (24:2) {#each people as person (person.id)}
+    // (29:2) {#each people as person (person.id)}
     function create_each_block(key_1, ctx) {
     	let div;
     	let h4;
@@ -790,10 +797,10 @@ var app = (function () {
     			button = element("button");
     			button.textContent = "Delete";
     			t9 = space();
-    			add_location(h4, file, 25, 6, 676);
-    			add_location(p, file, 29, 6, 803);
-    			add_location(button, file, 30, 6, 865);
-    			add_location(div, file, 24, 4, 664);
+    			add_location(h4, file, 30, 6, 760);
+    			add_location(p, file, 34, 6, 887);
+    			add_location(button, file, 35, 6, 949);
+    			add_location(div, file, 29, 4, 748);
     			this.first = div;
     		},
     		m: function mount(target, anchor) {
@@ -847,7 +854,7 @@ var app = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(24:2) {#each people as person (person.id)}",
+    		source: "(29:2) {#each people as person (person.id)}",
     		ctx
     	});
 
@@ -910,9 +917,9 @@ var app = (function () {
     				each_1_else.c();
     			}
 
-    			add_location(button, file, 22, 2, 570);
+    			add_location(button, file, 27, 2, 649);
     			attr_dev(main, "class", "svelte-177t831");
-    			add_location(main, file, 21, 0, 561);
+    			add_location(main, file, 26, 0, 640);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -935,7 +942,7 @@ var app = (function () {
     			current = true;
 
     			if (!mounted) {
-    				dispose = listen_dev(button, "click", /*toggleModal*/ ctx[2], false, false, false);
+    				dispose = listen_dev(button, "click", /*toggleModal*/ ctx[2], { once: true }, false, false);
     				mounted = true;
     			}
     		},

@@ -4,8 +4,9 @@
   export let isPromo = false;
 </script>
 
+<!-- on:click|self - only fires the event if the clicked element is the target -->
 {#if showModal}
-  <div class="backdrop" class:promo={isPromo} on:click>
+  <div class="backdrop" class:promo={isPromo} on:click|self>
     <div class="modal">
       <p>{message}</p>
     </div>
