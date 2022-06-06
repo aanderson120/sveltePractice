@@ -482,6 +482,7 @@ var app = (function () {
     const file$1 = "src\\Modal.svelte";
 
     // (7:0) {#if showModal}
+
     function create_if_block$1(ctx) {
     	let div1;
     	let div0;
@@ -514,6 +515,7 @@ var app = (function () {
     				toggle_class(div1, "promo", /*isPromo*/ ctx[1]);
     			}
     		},
+    		p: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div1);
     		}
@@ -524,6 +526,7 @@ var app = (function () {
     		id: create_if_block$1.name,
     		type: "if",
     		source: "(7:0) {#if showModal}",
+
     		ctx
     	});
 
@@ -548,6 +551,7 @@ var app = (function () {
     		},
     		p: function update(ctx, [dirty]) {
     			if (/*showModal*/ ctx[2]) if_block.p(ctx, dirty);
+
     		},
     		i: noop,
     		o: noop,
@@ -576,6 +580,7 @@ var app = (function () {
     	let { isPromo = false } = $$props;
     	const writable_props = ['message', 'isPromo'];
 
+
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Modal> was created with unknown prop '${key}'`);
     	});
@@ -590,6 +595,7 @@ var app = (function () {
     	$$self.$inject_state = $$props => {
     		if ('message' in $$props) $$invalidate(0, message = $$props.message);
     		if ('showModal' in $$props) $$invalidate(2, showModal = $$props.showModal);
+
     		if ('isPromo' in $$props) $$invalidate(1, isPromo = $$props.isPromo);
     	};
 
@@ -598,6 +604,7 @@ var app = (function () {
     	}
 
     	return [message, isPromo, showModal];
+
     }
 
     class Modal extends SvelteComponentDev {
@@ -860,6 +867,7 @@ var app = (function () {
 
     			attr_dev(main, "class", "svelte-6pv3cb");
     			add_location(main, file, 16, 0, 443);
+
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");

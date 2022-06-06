@@ -2,6 +2,7 @@
   export let message = "default value";
   let showModal = true;
   export let isPromo = false;
+
 </script>
 
 {#if showModal}

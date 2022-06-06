@@ -35,7 +35,6 @@
     padding: 1em;
     max-width: 240px;
     margin: 0 auto;
-    background-color: grey;
   }
 
   @media (min-width: 640px) {
