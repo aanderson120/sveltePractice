@@ -481,29 +481,39 @@ var app = (function () {
 
     const file$1 = "src\\Modal.svelte";
 
-    // (6:0) {#if showModal}
+    // (7:0) {#if showModal}
+
     function create_if_block$1(ctx) {
     	let div1;
     	let div0;
     	let p;
+    	let t;
 
     	const block = {
     		c: function create() {
     			div1 = element("div");
     			div0 = element("div");
     			p = element("p");
-    			p.textContent = "Sign up for offers!";
-    			add_location(p, file$1, 8, 6, 159);
+    			t = text(/*message*/ ctx[0]);
+    			add_location(p, file$1, 9, 6, 207);
     			attr_dev(div0, "class", "modal svelte-14der3p");
-    			add_location(div0, file$1, 7, 4, 133);
+    			add_location(div0, file$1, 8, 4, 181);
     			attr_dev(div1, "class", "backdrop svelte-14der3p");
     			toggle_class(div1, "promo", /*isPromo*/ ctx[1]);
-    			add_location(div1, file$1, 6, 2, 84);
+    			add_location(div1, file$1, 7, 2, 132);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
     			append_dev(div1, div0);
     			append_dev(div0, p);
+    			append_dev(p, t);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*message*/ 1) set_data_dev(t, /*message*/ ctx[0]);
+
+    			if (dirty & /*isPromo*/ 2) {
+    				toggle_class(div1, "promo", /*isPromo*/ ctx[1]);
+    			}
     		},
     		p: noop,
     		d: function destroy(detaching) {
@@ -515,7 +525,8 @@ var app = (function () {
     		block,
     		id: create_if_block$1.name,
     		type: "if",
-    		source: "(6:0) {#if showModal}",
+    		source: "(7:0) {#if showModal}",
+
     		ctx
     	});
 
@@ -524,7 +535,7 @@ var app = (function () {
 
     function create_fragment$1(ctx) {
     	let if_block_anchor;
-    	let if_block = /*showModal*/ ctx[0] && create_if_block$1(ctx);
+    	let if_block = /*showModal*/ ctx[2] && create_if_block$1(ctx);
 
     	const block = {
     		c: function create() {
@@ -539,7 +550,8 @@ var app = (function () {
     			insert_dev(target, if_block_anchor, anchor);
     		},
     		p: function update(ctx, [dirty]) {
-    			if (/*showModal*/ ctx[0]) if_block.p(ctx, dirty);
+    			if (/*showModal*/ ctx[2]) if_block.p(ctx, dirty);
+
     		},
     		i: noop,
     		o: noop,
@@ -563,18 +575,27 @@ var app = (function () {
     function instance$1($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Modal', slots, []);
+    	let { message = "default value" } = $$props;
     	let showModal = true;
-    	let isPromo = true;
-    	const writable_props = [];
+    	let { isPromo = false } = $$props;
+    	const writable_props = ['message', 'isPromo'];
+
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Modal> was created with unknown prop '${key}'`);
     	});
 
-    	$$self.$capture_state = () => ({ showModal, isPromo });
+    	$$self.$$set = $$props => {
+    		if ('message' in $$props) $$invalidate(0, message = $$props.message);
+    		if ('isPromo' in $$props) $$invalidate(1, isPromo = $$props.isPromo);
+    	};
+
+    	$$self.$capture_state = () => ({ message, showModal, isPromo });
 
     	$$self.$inject_state = $$props => {
-    		if ('showModal' in $$props) $$invalidate(0, showModal = $$props.showModal);
+    		if ('message' in $$props) $$invalidate(0, message = $$props.message);
+    		if ('showModal' in $$props) $$invalidate(2, showModal = $$props.showModal);
+
     		if ('isPromo' in $$props) $$invalidate(1, isPromo = $$props.isPromo);
     	};
 
@@ -582,13 +603,14 @@ var app = (function () {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [showModal, isPromo];
+    	return [message, isPromo, showModal];
+
     }
 
     class Modal extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1, create_fragment$1, safe_not_equal, {});
+    		init(this, options, instance$1, create_fragment$1, safe_not_equal, { message: 0, isPromo: 1 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -596,6 +618,22 @@ var app = (function () {
     			options,
     			id: create_fragment$1.name
     		});
+    	}
+
+    	get message() {
+    		throw new Error("<Modal>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set message(value) {
+    		throw new Error("<Modal>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get isPromo() {
+    		throw new Error("<Modal>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set isPromo(value) {
+    		throw new Error("<Modal>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
     }
 
@@ -608,7 +646,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (28:2) {:else}
+    // (27:2) {:else}
     function create_else_block(ctx) {
     	let p;
 
@@ -616,7 +654,7 @@ var app = (function () {
     		c: function create() {
     			p = element("p");
     			p.textContent = "There are no people to show at the moment.";
-    			add_location(p, file, 28, 4, 741);
+    			add_location(p, file, 27, 4, 783);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -631,14 +669,14 @@ var app = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(28:2) {:else}",
+    		source: "(27:2) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (22:6) {#if person.beltColor === "black"}
+    // (21:6) {#if person.beltColor === "black"}
     function create_if_block(ctx) {
     	let p;
     	let strong;
@@ -648,8 +686,8 @@ var app = (function () {
     			p = element("p");
     			strong = element("strong");
     			strong.textContent = "Master Ninja";
-    			add_location(strong, file, 22, 11, 538);
-    			add_location(p, file, 22, 8, 535);
+    			add_location(strong, file, 21, 11, 580);
+    			add_location(p, file, 21, 8, 577);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -664,14 +702,14 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(22:6) {#if person.beltColor === \\\"black\\\"}",
+    		source: "(21:6) {#if person.beltColor === \\\"black\\\"}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (19:2) {#each people as person (person.id)}
+    // (18:2) {#each people as person (person.id)}
     function create_each_block(key_1, ctx) {
     	let div;
     	let h4;
@@ -716,10 +754,10 @@ var app = (function () {
     			button = element("button");
     			button.textContent = "Delete";
     			t9 = space();
-    			add_location(h4, file, 20, 6, 463);
-    			add_location(p, file, 24, 6, 590);
-    			add_location(button, file, 25, 6, 652);
-    			add_location(div, file, 19, 4, 451);
+    			add_location(h4, file, 19, 6, 505);
+    			add_location(p, file, 23, 6, 632);
+    			add_location(button, file, 24, 6, 694);
+    			add_location(div, file, 18, 4, 493);
     			this.first = div;
     		},
     		m: function mount(target, anchor) {
@@ -773,7 +811,7 @@ var app = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(19:2) {#each people as person (person.id)}",
+    		source: "(18:2) {#each people as person (person.id)}",
     		ctx
     	});
 
@@ -787,7 +825,15 @@ var app = (function () {
     	let each_blocks = [];
     	let each_1_lookup = new Map();
     	let current;
-    	modal = new Modal({ $$inline: true });
+
+    	modal = new Modal({
+    			props: {
+    				message: "I am a prop value",
+    				isPromo: true
+    			},
+    			$$inline: true
+    		});
+
     	let each_value = /*people*/ ctx[0];
     	validate_each_argument(each_value);
     	const get_key = ctx => /*person*/ ctx[3].id;
@@ -819,8 +865,9 @@ var app = (function () {
     				each_1_else.c();
     			}
 
-    			attr_dev(main, "class", "svelte-177t831");
-    			add_location(main, file, 17, 0, 401);
+    			attr_dev(main, "class", "svelte-6pv3cb");
+    			add_location(main, file, 16, 0, 443);
+
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
