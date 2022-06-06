@@ -74,6 +74,16 @@ var app = (function () {
     function set_current_component(component) {
         current_component = component;
     }
+    // TODO figure out if we still want to support
+    // shorthand events, or if we want to implement
+    // a real bubbling mechanism
+    function bubble(component, event) {
+        const callbacks = component.$$.callbacks[event.type];
+        if (callbacks) {
+            // @ts-ignore
+            callbacks.slice().forEach(fn => fn.call(this, event));
+        }
+    }
 
     const dirty_components = [];
     const binding_callbacks = [];
@@ -482,12 +492,13 @@ var app = (function () {
     const file$1 = "src\\Modal.svelte";
 
     // (7:0) {#if showModal}
-
     function create_if_block$1(ctx) {
     	let div1;
     	let div0;
     	let p;
     	let t;
+    	let mounted;
+    	let dispose;
 
     	const block = {
     		c: function create() {
@@ -495,29 +506,35 @@ var app = (function () {
     			div0 = element("div");
     			p = element("p");
     			t = text(/*message*/ ctx[0]);
-    			add_location(p, file$1, 9, 6, 207);
+    			add_location(p, file$1, 9, 6, 224);
     			attr_dev(div0, "class", "modal svelte-14der3p");
-    			add_location(div0, file$1, 8, 4, 181);
+    			add_location(div0, file$1, 8, 4, 198);
     			attr_dev(div1, "class", "backdrop svelte-14der3p");
-    			toggle_class(div1, "promo", /*isPromo*/ ctx[1]);
-    			add_location(div1, file$1, 7, 2, 132);
+    			toggle_class(div1, "promo", /*isPromo*/ ctx[2]);
+    			add_location(div1, file$1, 7, 2, 140);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
     			append_dev(div1, div0);
     			append_dev(div0, p);
     			append_dev(p, t);
+
+    			if (!mounted) {
+    				dispose = listen_dev(div1, "click", /*click_handler*/ ctx[3], false, false, false);
+    				mounted = true;
+    			}
     		},
     		p: function update(ctx, dirty) {
     			if (dirty & /*message*/ 1) set_data_dev(t, /*message*/ ctx[0]);
 
-    			if (dirty & /*isPromo*/ 2) {
-    				toggle_class(div1, "promo", /*isPromo*/ ctx[1]);
+    			if (dirty & /*isPromo*/ 4) {
+    				toggle_class(div1, "promo", /*isPromo*/ ctx[2]);
     			}
     		},
-    		p: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div1);
+    			mounted = false;
+    			dispose();
     		}
     	};
 
@@ -526,7 +543,6 @@ var app = (function () {
     		id: create_if_block$1.name,
     		type: "if",
     		source: "(7:0) {#if showModal}",
-
     		ctx
     	});
 
@@ -535,7 +551,7 @@ var app = (function () {
 
     function create_fragment$1(ctx) {
     	let if_block_anchor;
-    	let if_block = /*showModal*/ ctx[2] && create_if_block$1(ctx);
+    	let if_block = /*showModal*/ ctx[1] && create_if_block$1(ctx);
 
     	const block = {
     		c: function create() {
@@ -550,8 +566,18 @@ var app = (function () {
     			insert_dev(target, if_block_anchor, anchor);
     		},
     		p: function update(ctx, [dirty]) {
-    			if (/*showModal*/ ctx[2]) if_block.p(ctx, dirty);
-
+    			if (/*showModal*/ ctx[1]) {
+    				if (if_block) {
+    					if_block.p(ctx, dirty);
+    				} else {
+    					if_block = create_if_block$1(ctx);
+    					if_block.c();
+    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
+    				}
+    			} else if (if_block) {
+    				if_block.d(1);
+    				if_block = null;
+    			}
     		},
     		i: noop,
     		o: noop,
@@ -576,41 +602,43 @@ var app = (function () {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Modal', slots, []);
     	let { message = "default value" } = $$props;
-    	let showModal = true;
+    	let { showModal = false } = $$props;
     	let { isPromo = false } = $$props;
-    	const writable_props = ['message', 'isPromo'];
-
+    	const writable_props = ['message', 'showModal', 'isPromo'];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Modal> was created with unknown prop '${key}'`);
     	});
 
+    	function click_handler(event) {
+    		bubble.call(this, $$self, event);
+    	}
+
     	$$self.$$set = $$props => {
     		if ('message' in $$props) $$invalidate(0, message = $$props.message);
-    		if ('isPromo' in $$props) $$invalidate(1, isPromo = $$props.isPromo);
+    		if ('showModal' in $$props) $$invalidate(1, showModal = $$props.showModal);
+    		if ('isPromo' in $$props) $$invalidate(2, isPromo = $$props.isPromo);
     	};
 
     	$$self.$capture_state = () => ({ message, showModal, isPromo });
 
     	$$self.$inject_state = $$props => {
     		if ('message' in $$props) $$invalidate(0, message = $$props.message);
-    		if ('showModal' in $$props) $$invalidate(2, showModal = $$props.showModal);
-
-    		if ('isPromo' in $$props) $$invalidate(1, isPromo = $$props.isPromo);
+    		if ('showModal' in $$props) $$invalidate(1, showModal = $$props.showModal);
+    		if ('isPromo' in $$props) $$invalidate(2, isPromo = $$props.isPromo);
     	};
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [message, isPromo, showModal];
-
+    	return [message, showModal, isPromo, click_handler];
     }
 
     class Modal extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1, create_fragment$1, safe_not_equal, { message: 0, isPromo: 1 });
+    		init(this, options, instance$1, create_fragment$1, safe_not_equal, { message: 0, showModal: 1, isPromo: 2 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -628,6 +656,14 @@ var app = (function () {
     		throw new Error("<Modal>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
+    	get showModal() {
+    		throw new Error("<Modal>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set showModal(value) {
+    		throw new Error("<Modal>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
     	get isPromo() {
     		throw new Error("<Modal>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
@@ -642,11 +678,11 @@ var app = (function () {
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[3] = list[i];
+    	child_ctx[5] = list[i];
     	return child_ctx;
     }
 
-    // (27:2) {:else}
+    // (33:2) {:else}
     function create_else_block(ctx) {
     	let p;
 
@@ -654,7 +690,7 @@ var app = (function () {
     		c: function create() {
     			p = element("p");
     			p.textContent = "There are no people to show at the moment.";
-    			add_location(p, file, 27, 4, 783);
+    			add_location(p, file, 33, 4, 954);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -669,14 +705,14 @@ var app = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(27:2) {:else}",
+    		source: "(33:2) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (21:6) {#if person.beltColor === "black"}
+    // (27:6) {#if person.beltColor === "black"}
     function create_if_block(ctx) {
     	let p;
     	let strong;
@@ -686,8 +722,8 @@ var app = (function () {
     			p = element("p");
     			strong = element("strong");
     			strong.textContent = "Master Ninja";
-    			add_location(strong, file, 21, 11, 580);
-    			add_location(p, file, 21, 8, 577);
+    			add_location(strong, file, 27, 11, 751);
+    			add_location(p, file, 27, 8, 748);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -702,26 +738,26 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(21:6) {#if person.beltColor === \\\"black\\\"}",
+    		source: "(27:6) {#if person.beltColor === \\\"black\\\"}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (18:2) {#each people as person (person.id)}
+    // (24:2) {#each people as person (person.id)}
     function create_each_block(key_1, ctx) {
     	let div;
     	let h4;
-    	let t0_value = /*person*/ ctx[3].name + "";
+    	let t0_value = /*person*/ ctx[5].name + "";
     	let t0;
     	let t1;
     	let t2;
     	let p;
-    	let t3_value = /*person*/ ctx[3].age + "";
+    	let t3_value = /*person*/ ctx[5].age + "";
     	let t3;
     	let t4;
-    	let t5_value = /*person*/ ctx[3].beltColor + "";
+    	let t5_value = /*person*/ ctx[5].beltColor + "";
     	let t5;
     	let t6;
     	let t7;
@@ -729,10 +765,10 @@ var app = (function () {
     	let t9;
     	let mounted;
     	let dispose;
-    	let if_block = /*person*/ ctx[3].beltColor === "black" && create_if_block(ctx);
+    	let if_block = /*person*/ ctx[5].beltColor === "black" && create_if_block(ctx);
 
     	function click_handler() {
-    		return /*click_handler*/ ctx[2](/*person*/ ctx[3]);
+    		return /*click_handler*/ ctx[4](/*person*/ ctx[5]);
     	}
 
     	const block = {
@@ -754,10 +790,10 @@ var app = (function () {
     			button = element("button");
     			button.textContent = "Delete";
     			t9 = space();
-    			add_location(h4, file, 19, 6, 505);
-    			add_location(p, file, 23, 6, 632);
-    			add_location(button, file, 24, 6, 694);
-    			add_location(div, file, 18, 4, 493);
+    			add_location(h4, file, 25, 6, 676);
+    			add_location(p, file, 29, 6, 803);
+    			add_location(button, file, 30, 6, 865);
+    			add_location(div, file, 24, 4, 664);
     			this.first = div;
     		},
     		m: function mount(target, anchor) {
@@ -783,9 +819,9 @@ var app = (function () {
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty & /*people*/ 1 && t0_value !== (t0_value = /*person*/ ctx[3].name + "")) set_data_dev(t0, t0_value);
+    			if (dirty & /*people*/ 2 && t0_value !== (t0_value = /*person*/ ctx[5].name + "")) set_data_dev(t0, t0_value);
 
-    			if (/*person*/ ctx[3].beltColor === "black") {
+    			if (/*person*/ ctx[5].beltColor === "black") {
     				if (if_block) ; else {
     					if_block = create_if_block(ctx);
     					if_block.c();
@@ -796,8 +832,8 @@ var app = (function () {
     				if_block = null;
     			}
 
-    			if (dirty & /*people*/ 1 && t3_value !== (t3_value = /*person*/ ctx[3].age + "")) set_data_dev(t3, t3_value);
-    			if (dirty & /*people*/ 1 && t5_value !== (t5_value = /*person*/ ctx[3].beltColor + "")) set_data_dev(t5, t5_value);
+    			if (dirty & /*people*/ 2 && t3_value !== (t3_value = /*person*/ ctx[5].age + "")) set_data_dev(t3, t3_value);
+    			if (dirty & /*people*/ 2 && t5_value !== (t5_value = /*person*/ ctx[5].beltColor + "")) set_data_dev(t5, t5_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
@@ -811,7 +847,7 @@ var app = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(18:2) {#each people as person (person.id)}",
+    		source: "(24:2) {#each people as person (person.id)}",
     		ctx
     	});
 
@@ -820,23 +856,29 @@ var app = (function () {
 
     function create_fragment(ctx) {
     	let modal;
-    	let t;
+    	let t0;
     	let main;
+    	let button;
+    	let t2;
     	let each_blocks = [];
     	let each_1_lookup = new Map();
     	let current;
+    	let mounted;
+    	let dispose;
 
     	modal = new Modal({
     			props: {
-    				message: "I am a prop value",
-    				isPromo: true
+    				message: "Hey there!",
+    				isPromo: false,
+    				showModal: /*showModal*/ ctx[0]
     			},
     			$$inline: true
     		});
 
-    	let each_value = /*people*/ ctx[0];
+    	modal.$on("click", /*toggleModal*/ ctx[2]);
+    	let each_value = /*people*/ ctx[1];
     	validate_each_argument(each_value);
-    	const get_key = ctx => /*person*/ ctx[3].id;
+    	const get_key = ctx => /*person*/ ctx[5].id;
     	validate_each_keys(ctx, each_value, get_each_context, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -854,8 +896,11 @@ var app = (function () {
     	const block = {
     		c: function create() {
     			create_component(modal.$$.fragment);
-    			t = space();
+    			t0 = space();
     			main = element("main");
+    			button = element("button");
+    			button.textContent = "Open Modal";
+    			t2 = space();
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].c();
@@ -865,17 +910,19 @@ var app = (function () {
     				each_1_else.c();
     			}
 
-    			attr_dev(main, "class", "svelte-6pv3cb");
-    			add_location(main, file, 16, 0, 443);
-
+    			add_location(button, file, 22, 2, 570);
+    			attr_dev(main, "class", "svelte-177t831");
+    			add_location(main, file, 21, 0, 561);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
     			mount_component(modal, target, anchor);
-    			insert_dev(target, t, anchor);
+    			insert_dev(target, t0, anchor);
     			insert_dev(target, main, anchor);
+    			append_dev(main, button);
+    			append_dev(main, t2);
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].m(main, null);
@@ -886,10 +933,19 @@ var app = (function () {
     			}
 
     			current = true;
+
+    			if (!mounted) {
+    				dispose = listen_dev(button, "click", /*toggleModal*/ ctx[2], false, false, false);
+    				mounted = true;
+    			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*handleClick, people*/ 3) {
-    				each_value = /*people*/ ctx[0];
+    			const modal_changes = {};
+    			if (dirty & /*showModal*/ 1) modal_changes.showModal = /*showModal*/ ctx[0];
+    			modal.$set(modal_changes);
+
+    			if (dirty & /*handleClick, people*/ 10) {
+    				each_value = /*people*/ ctx[1];
     				validate_each_argument(each_value);
     				validate_each_keys(ctx, each_value, get_each_context, get_key);
     				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, main, destroy_block, create_each_block, null, get_each_context);
@@ -917,7 +973,7 @@ var app = (function () {
     		},
     		d: function destroy(detaching) {
     			destroy_component(modal, detaching);
-    			if (detaching) detach_dev(t);
+    			if (detaching) detach_dev(t0);
     			if (detaching) detach_dev(main);
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
@@ -925,6 +981,8 @@ var app = (function () {
     			}
 
     			if (each_1_else) each_1_else.d();
+    			mounted = false;
+    			dispose();
     		}
     	};
 
@@ -942,6 +1000,11 @@ var app = (function () {
     function instance($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('App', slots, []);
+    	let showModal = false;
+
+    	const toggleModal = () => {
+    		$$invalidate(0, showModal = !showModal);
+    	};
 
     	let people = [
     		{
@@ -966,7 +1029,7 @@ var app = (function () {
 
     	const handleClick = id => {
     		//delete the person from people
-    		$$invalidate(0, people = people.filter(person => person.id != id));
+    		$$invalidate(1, people = people.filter(person => person.id != id));
     	};
 
     	const writable_props = [];
@@ -976,17 +1039,25 @@ var app = (function () {
     	});
 
     	const click_handler = person => handleClick(person.id);
-    	$$self.$capture_state = () => ({ Modal, people, handleClick });
+
+    	$$self.$capture_state = () => ({
+    		Modal,
+    		showModal,
+    		toggleModal,
+    		people,
+    		handleClick
+    	});
 
     	$$self.$inject_state = $$props => {
-    		if ('people' in $$props) $$invalidate(0, people = $$props.people);
+    		if ('showModal' in $$props) $$invalidate(0, showModal = $$props.showModal);
+    		if ('people' in $$props) $$invalidate(1, people = $$props.people);
     	};
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [people, handleClick, click_handler];
+    	return [showModal, people, toggleModal, handleClick, click_handler];
     }
 
     class App extends SvelteComponentDev {
