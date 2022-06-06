@@ -104,6 +104,13 @@ var app = (function () {
         node.addEventListener(event, handler, options);
         return () => node.removeEventListener(event, handler, options);
     }
+    function self(fn) {
+        return function (event) {
+            // @ts-ignore
+            if (event.target === this)
+                fn.call(this, event);
+        };
+    }
     function attr(node, attribute, value) {
         if (value == null)
             node.removeAttribute(attribute);
@@ -579,6 +586,7 @@ var app = (function () {
     			attr_dev(div1, "class", "backdrop svelte-14der3p");
     			toggle_class(div1, "promo", /*isPromo*/ ctx[1]);
     			add_location(div1, file$1, 6, 2, 100);
+
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -592,6 +600,7 @@ var app = (function () {
 
     			if (!mounted) {
     				dispose = listen_dev(div1, "click", /*click_handler*/ ctx[4], false, false, false);
+
     				mounted = true;
     			}
     		},
@@ -709,6 +718,7 @@ var app = (function () {
     		id: fallback_block.name,
     		type: "fallback",
     		source: "(9:12)          ",
+
     		ctx
     	});
 
@@ -945,6 +955,7 @@ var app = (function () {
     }
 
     // (43:2) {:else}
+
     function create_else_block(ctx) {
     	let p;
 
@@ -953,6 +964,7 @@ var app = (function () {
     			p = element("p");
     			p.textContent = "There are no people to show at the moment.";
     			add_location(p, file, 43, 4, 1184);
+
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -968,6 +980,7 @@ var app = (function () {
     		id: create_else_block.name,
     		type: "else",
     		source: "(43:2) {:else}",
+
     		ctx
     	});
 
@@ -975,6 +988,7 @@ var app = (function () {
     }
 
     // (37:6) {#if person.beltColor === "black"}
+
     function create_if_block(ctx) {
     	let p;
     	let strong;
@@ -986,6 +1000,7 @@ var app = (function () {
     			strong.textContent = "Master Ninja";
     			add_location(strong, file, 37, 11, 981);
     			add_location(p, file, 37, 8, 978);
+
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -1001,6 +1016,7 @@ var app = (function () {
     		id: create_if_block.name,
     		type: "if",
     		source: "(37:6) {#if person.beltColor === \\\"black\\\"}",
+
     		ctx
     	});
 
@@ -1008,6 +1024,7 @@ var app = (function () {
     }
 
     // (34:2) {#each people as person (person.id)}
+
     function create_each_block(key_1, ctx) {
     	let div;
     	let h4;
@@ -1056,6 +1073,7 @@ var app = (function () {
     			add_location(p, file, 39, 6, 1033);
     			add_location(button, file, 40, 6, 1095);
     			add_location(div, file, 34, 4, 894);
+
     			this.first = div;
     		},
     		m: function mount(target, anchor) {
@@ -1110,6 +1128,7 @@ var app = (function () {
     		id: create_each_block.name,
     		type: "each",
     		source: "(34:2) {#each people as person (person.id)}",
+
     		ctx
     	});
 
@@ -1179,6 +1198,7 @@ var app = (function () {
     			add_location(button, file, 32, 2, 800);
     			attr_dev(main, "class", "svelte-177t831");
     			add_location(main, file, 31, 0, 791);
+
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -1201,7 +1221,7 @@ var app = (function () {
     			current = true;
 
     			if (!mounted) {
-    				dispose = listen_dev(button, "click", /*toggleModal*/ ctx[2], false, false, false);
+    				dispose = listen_dev(button, "click", /*toggleModal*/ ctx[2], { once: true }, false, false);
     				mounted = true;
     			}
     		},
