@@ -10,10 +10,9 @@
     //delete the person from people
     people = people.filter((person) => person.id != id);
   };
-
 </script>
 
-<Modal />
+<Modal message="I am a prop value" isPromo={true} />
 
 <main>
   {#each people as person (person.id)}
