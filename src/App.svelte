@@ -1,29 +1,27 @@
 <script>
   import Modal from "./Modal.svelte";
   import AddPersonForm from "./AddPersonForm.svelte";
-
   let showModal = false;
-  const toggleModal = () => {
+  let toggleModal = () => {
     showModal = !showModal;
   };
-
   let people = [
     { name: "yoshi", beltColor: "black", age: 25, id: 1 },
     { name: "mario", beltColor: "orange", age: 45, id: 2 },
     { name: "luigi", beltColor: "brown", age: 35, id: 3 },
   ];
-  const handleClick = (id) => {
-    //delete the person from people
+  const handleClick = (e, id) => {
     people = people.filter((person) => person.id != id);
+    console.log(e);
   };
 </script>
 
-<Modal isPromo={false} {showModal} on:click={toggleModal}>
+<Modal {showModal} on:click={toggleModal}>
   <AddPersonForm />
 </Modal>
 
 <main>
-  <button on:click|once={toggleModal}>Open Modal</button>
+  <button on:click={toggleModal}>Open Modal</button>
   {#each people as person (person.id)}
     <div>
       <h4>{person.name}</h4>
@@ -31,10 +29,10 @@
         <p><strong>Master Ninja</strong></p>
       {/if}
       <p>{person.age} years old, {person.beltColor} belt.</p>
-      <button on:click={() => handleClick(person.id)}>Delete</button>
+      <button on:click={(e) => handleClick(e, person.id)}>delete</button>
     </div>
   {:else}
-    <p>There are no people to show at the moment.</p>
+    <p>There are no people to show...</p>
   {/each}
 </main>
 
