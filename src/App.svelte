@@ -6,18 +6,25 @@
     showModal = !showModal;
   };
   let people = [
-    { name: "yoshi", beltColor: "black", age: 25, id: 1 },
-    { name: "mario", beltColor: "orange", age: 45, id: 2 },
-    { name: "luigi", beltColor: "brown", age: 35, id: 3 },
+    { name: "yoshi", beltColor: "black", age: 25, id: 1, skills: [] },
+    { name: "mario", beltColor: "orange", age: 45, id: 2, skills: [] },
+    { name: "luigi", beltColor: "brown", age: 35, id: 3, skills: [] },
   ];
   const handleClick = (e, id) => {
     people = people.filter((person) => person.id != id);
     console.log(e);
   };
+
+  const addPerson = (e) => {
+    // console.log(e.detail)
+    const person = e.detail;
+    people = [person, ...people];
+    showModal = false;
+  };
 </script>
 
 <Modal {showModal} on:click={toggleModal}>
-  <AddPersonForm />
+  <AddPersonForm on:addPerson={addPerson} />
 </Modal>
 
 <main>
@@ -29,6 +36,11 @@
         <p><strong>Master Ninja</strong></p>
       {/if}
       <p>{person.age} years old, {person.beltColor} belt.</p>
+      <ul>
+        {#each person.skills as skill}
+          <li>{skill}</li>
+        {/each}
+      </ul>
       <button on:click={(e) => handleClick(e, person.id)}>delete</button>
     </div>
   {:else}
@@ -42,6 +54,15 @@
     padding: 1em;
     max-width: 240px;
     margin: 0 auto;
+  }
+
+  ul {
+    display: flex;
+    flex-direction: column;
+  }
+  li {
+    width: fit-content;
+    align-self: center;
   }
 
   @media (min-width: 640px) {
